@@ -1,0 +1,15 @@
+Rating system:
+  Run for x iterations (Done)
+  Percentage of the time a Net wins (Done)
+  Turn Count -> Higher or Lower amount? (N/A)
+    Lower -> Faster Win
+    Higher -> More competitive
+  Max value is new MasterNet (Class Error)
+
+Recursive iterations for x generations
+Player v final net?
+
+UI:
+  Instance, iteration, mutation chance/amount & generation customization
+  
+  
