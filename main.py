@@ -14,14 +14,14 @@ P2Float = 0.5
 
 #Network Variables
 area = boardxy[0]*boardxy[1]
-#XXXXXX Weights and Biases
+#Network layer variable
 net = [area*2,50,50,50,boardxy[0]]
-generations = 50
+#Simulation Variables
+generations = 100
 instances = 150
-iterations = 50
-mutationChance = 0.1
-mutationAmount = 0.5
-
+iterations = 100
+mutationChance = 0.25
+mutationAmount = 2
 mstrNet = network.Network(net)
 
 class Game():
@@ -46,6 +46,7 @@ class Game():
         if self.PlayerChar == P1Char:
           self.board[x-1][i] = P1Char
           self.printBoard()
+          #Win check for P1
           if self.winCheck((x-1,i)):
             self.win = (True,P1Char)
             print(self.win)
@@ -53,6 +54,7 @@ class Game():
         else:
           self.board[x-1][i] = P2Char
           self.printBoard()
+          #Win check for P2
           if self.winCheck((x-1,i)):
             self.win = (True,P2Char)
             print(self.win)
