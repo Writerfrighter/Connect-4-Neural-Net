@@ -20,7 +20,6 @@ class Network(object):
 
   #"mc" (mutationChance) chance to offset weights and biases by "ma" (mutationAmount)
   def mutate(self,mc,ma):
-    pass
     #Mutate Weights
     for w in range(len(self.weights)):
       for x in range(len(self.weights[w])):
