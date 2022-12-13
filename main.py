@@ -15,14 +15,8 @@ P2Float = 0.5
 #Network Variables
 area = boardxy[0]*boardxy[1]
 #Network layer variable
-net = [area*2,50,50,50,boardxy[0]]
-#Simulation Variables
-generations = 100
-instances = 150
-iterations = 100
-mutationChance = 0.25
-mutationAmount = 2
-mstrNet = network.Network(net)
+netLayers = [area*2,50,50,50,boardxy[0]]
+net = network.Network(netLayers)
 
 class Game():
   def __init__(self):
@@ -30,6 +24,8 @@ class Game():
     self.cols = []
     self.PlayerChar = "X"
     self.win = (False, 0)
+    self.humanPlayer = random.choice([P1Char,P2Char])
+    self.log = []
     for i in range(boardxy[0]):
       self.board.append([])
       for j in range(boardxy[1]):
@@ -44,20 +40,20 @@ class Game():
       if self.board[x-1][i] == " ":
         self.cols[x-1] += 1
         if self.PlayerChar == P1Char:
+          self.logMove(x)
           self.board[x-1][i] = P1Char
           self.printBoard()
           #Win check for P1
           if self.winCheck((x-1,i)):
             self.win = (True,P1Char)
-            print(self.win)
           self.PlayerChar = P2Char
         else:
+          self.logMove(x)
           self.board[x-1][i] = P2Char
           self.printBoard()
           #Win check for P2
           if self.winCheck((x-1,i)):
             self.win = (True,P2Char)
-            print(self.win)
           self.PlayerChar = P1Char
         break
   def winCheck(self,cord):
@@ -81,6 +77,7 @@ class Game():
         return False
     return True
   def printBoard(self):
+    #Prints board to console
     for i in range(boardxy[1]):
       row = "|"
       for j in range(boardxy[0]):
@@ -88,6 +85,8 @@ class Game():
       print(row)
     print("")
 
+  #Network Game Functions
+    
   def exportBoard(self):
     #Converts board into a 2D list containing 1 & 0 with 2 indexes for each grid on the board for Piece 1 and Piece 2.
     convertedBoard = []
@@ -105,66 +104,34 @@ class Game():
     convertedBoard = np.reshape(convertedBoard,(area*2,1))
     return convertedBoard
 
-
-def runGeneration():
-  global mstrNet
-  currentGen = []
-  results = []
-  #Initialize results array
-  for i in range(instances):
-    results.append([0,0])
-  #Starts x games agianst privious best net
-  for i in range(instances):
-    currentGen.append([Game(),(mstrNet,deepcopy(mstrNet))])
-    currentGen[i][1][1].mutate(mutationChance, mutationAmount)
-  #Runs games
-  for j in range(iterations):
-    for i in range(instances):
-      firstPlayer = random.randint(0,1)
-      peices = 0
-      while(currentGen[i][0].win[0] == False):
-        peices+=1
-        if peices > area:
-          #print("Timed Out")
-          break
-        currentGen[i][0].addPeice(currentGen[i][1][firstPlayer].evaluate(currentGen[i][0].exportBoard())[0])
-        if currentGen[i][0].win[0] == False:
-          peices +=1
-          if peices > area:
-            #print("Timed Out")
-            break
-          currentGen[i][0].addPeice(currentGen[i][1][abs(firstPlayer-1)].evaluate(currentGen[i][0].exportBoard())[0])
-      #If win is "X"
-      if currentGen[i][0].win[0] and currentGen[i][0].win[1] == "X":
-        results[i][firstPlayer] += 1
-      #If win is "O"
-      elif currentGen[i][0].win[0] and currentGen[i][0].win[1] == "O":
-        results[i][abs(firstPlayer-1)] += 1
-    #print(results)
-  #Return each nets win rate
-  winRates = [0]
-  #Wins
-  for x in results:
-    winRates[0] += x[0]
-    winRates.append(x[1])
-  #Mst win rate init
-  winRates[0] = winRates[0]/instances
-  #Finds percentage
-  for i in range(len(winRates)):
-    winRates[i] = winRates[i]/iterations
-  print(winRates)
-  print(np.argmax(winRates))
-  if (np.argmax(winRates) != 0):
-    mstrNet = deepcopy(currentGen[np.argmax(winRates)-1][1][1])
-  
-      
+  def logMove(self,move):
+    if self.PlayerChar == self.humanPlayer:
+      self.log.append((self.exportBoard(),move-1))
+ 
+def runGame():
+  game = Game()
+  while game.win[0] == False:
+    if game.humanPlayer == "X":
+      game.addPeice(int(input("Which column would you like to add a X to? ")))
+    else:
+      game.addPeice(net.evaluate(game.exportBoard())[0])
+    if game.win[0] == False:
+      if game.humanPlayer == "O":
+        game.addPeice(int(input("Which column would you like to add a O to? ")))
+      else:
+        game.addPeice(net.evaluate(game.exportBoard())[0])
+  if game.win[1] == game.humanPlayer:
+    print("Congrats!")
+    print("Updating Network...")
+    net.update_Network(game.log,10)
+    print("Done")
+  else:
+    print(":O the Network has learned :D")
+  print("Starting new game...")
 def main():
-  for i in range(generations):
-    runGeneration()
-  #game = Game()
-  #net1 = network.Network(net)
-  #net2 = network.Network(net)
-  #for i in range(8):
-    #game.addPeice(net1.evaluate(game.exportBoard())[0])
-    #game.addPeice(net2.evaluate(game.exportBoard())[0])
+  while True:
+    runGame()
+  
+  
+  
 main()
