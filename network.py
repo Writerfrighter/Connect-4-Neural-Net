@@ -15,6 +15,7 @@ class Network(object):
     return a
 
   def update_Network(self, game_log, eta):
+    random.shuffle(game_log)
     nabla_b = [np.zeros(b.shape) for b in self.biases]
     nabla_w = [np.zeros(w.shape) for w in self.weights]
     for x, y in game_log:
@@ -57,13 +58,70 @@ class Network(object):
 
   def evaluate(self, data):
     return([(np.argmax(self.feedforward(data))+1)])
+    
+  def writeToFile(self):
+    #Clear file
+    file = open("Network/Sizes.txt","w")
+    file.write("")
+    #Write layer sizes to file
+    file = open("Network/Sizes.txt","a")
+    file.write(str(self.sizes) + "\n")
+    #Write all weights to the file
+    layer = 0
+    for layers in self.weights:
+      layer += 1
+      file = open("Network/Weights/"+str(layer)+".txt", "w")
+      for neurons in layers:
+        for weights in neurons:
+          file.write(str(weights))
+          file.write("\n")
+      file.close()
+    #Write all baises to the file
+    layer = 0
+    for layers in self.biases:
+      layer += 1
+      file = open("Network/Biases/"+str(layer)+".txt","w")
+      for neuronBiases in layers:
+        file.write(str(neuronBiases[0]))
+        file.write("\n")
 
+  def readFile(self):
+    file = open("Network/Sizes.txt","r")
+    #Convert network size from str to list
+    sizes = file.read().split("\n")[0].strip(" ").strip("]").strip("[").split(",")
+    #Transform str to int
+    for i in range(len(sizes)):
+      sizes[i] = int(sizes[i])
+    #Write size to network
+    self.sizes = sizes
+    
+    #Reset weights
+    self.weights = []
+    #Write weights to network
+    for l in range(len(self.sizes)-1):
+      self.weights.append([])
+      file = open("Network/Weights/"+str(l+1)+".txt","r")
+      weights = file.read().split("\n")
+      for n in range(self.sizes[l+1]):
+        self.weights[l].append([])
+        for w in range(self.sizes[l]):
+          self.weights[l][n].append(weights[n*sizes[l]+w])
+
+    #Reset biases
+    self.biases = []
+    #Write biases to network
+    for l in range(len(self.sizes)-1):
+      file = open("Network/Biases"+str(l+1)+".txt","r")
+      self.biases.append([])
+      for b in range(self.sizes[l+1]):
+        self.biases[l].append(file[b])
   def cost_derivative(self, output_activations, y):
     return (output_activations-y)
 
-#Sigmoid :O
+#Returns a value that is a compression of the real number line into 0 & 1
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
+
+#Returns the "Senitivity" of a certain weight or bias
 def sigmoid_prime(z):
-    """Derivative of the sigmoid function."""
     return sigmoid(z)*(1-sigmoid(z))
