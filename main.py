@@ -32,6 +32,7 @@ class Game():
         self.board[i].append(" ")
     for i in range(boardxy[0]):
       self.cols.append(0)
+      
   def addPiece(self,x):
     
     #Add peice to the board at collumn x
@@ -66,17 +67,22 @@ class Game():
     print("Invalid col")
   def winCheck(self):
     #Checks if surrounding peices are the same, if so runs winHelp
+    #Loops through all locations on the board
     for i in range(boardxy[0]):
       for j in range(boardxy[1]):
+        #For each direction, check the current location and the piece next to in the vector is the current peice
         for o in range(len(vectors)):
           try:
+            #Piece next to is the same
             if self.board[i+vectors[o][0]][j+vectors[o][1]] == self.PlayerChar and self.board[i][j] == self.PlayerChar:
+              #Make sure we are not iterating backward through the list
               if i+vectors[o][0] >= 0 and j+vectors[o][1] >= 0:
                 if self.winHelp(vectors[o],(i,j)):
                   return True
                 else:
                   pass
           except IndexError:
+            #In the event that the vector is refering to a peice above the top row
             pass
     return False
         
@@ -92,7 +98,7 @@ class Game():
     for i in range(boardxy[1]):
       row = "|"
       for j in range(boardxy[0]):
-        row += " " + str(self.board[j][boardxy[1]-i-1]) + " |"
+        row += " " + str(self.board[j][-i-1]) + " |"
       print(row)
     print("")
 
@@ -100,13 +106,21 @@ class Game():
     
   def exportBoard(self):
     #Converts board into a 2D list containing 1 & 0 with 2 indexes for each grid on the board for Piece 1 and Piece 2.
+    #Fills board by cols, left to right
+    #6 . . . . . . .
+    #5 . . . . . . .
+    #4 . . . . . . .
+    #2 . . . . . . .
+    #1 . . . . . . .
+    #  a b c d e f g
+    #So a1, a2, a3, and so on
     convertedBoard = []
-    for i in range(boardxy[1]):
-      for j in range(boardxy[0]):
-        if self.board[j][i] == "X":
+    for i in range(boardxy[0]):
+      for j in range(boardxy[1]):
+        if self.board[i][j] == "X":
           convertedBoard.append([1])
           convertedBoard.append([0])
-        elif self.board[j][i] == "O":
+        elif self.board[i][j] == "O":
           convertedBoard.append([0])
           convertedBoard.append([1])
         else:
@@ -116,10 +130,12 @@ class Game():
     return convertedBoard
 
   def logMove(self,move):
+    #Log move if human player to a game log to train the network.
     if self.PlayerChar == self.humanPlayer or self.humanPlayer == "Both":
       self.log.append((self.exportBoard(),move-1))
 
 def getCol(game):
+  #Prevent invalid arguments for column selection
   try:
     game.addPiece(int(input("Which column would you like to add a " + game.PlayerChar + " to? ")))
   except:
@@ -127,6 +143,7 @@ def getCol(game):
     getCol(game)
     
 def runPlayerGame():
+  #Run a game between 2 People
   game = Game()
   game.humanPlayer = "Both"
   while game.win[0] == False:
@@ -139,6 +156,7 @@ def runPlayerGame():
 
       
 def runGame():
+  #Run a game with the Feedforward network and a player
   game = Game()
   while game.win[0] == False:
     if game.humanPlayer == "X":
@@ -160,5 +178,5 @@ def runGame():
   print("Starting new game...")
   
 def main():
-  net.writeToFile()
+  runPlayerGame()
 main()
