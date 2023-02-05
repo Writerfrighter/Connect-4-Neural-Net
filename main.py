@@ -1,6 +1,7 @@
 import network
 import numpy as np
 import random
+import dataLoader
 
 
 #Game Variables
@@ -162,12 +163,12 @@ def runGame():
     if game.humanPlayer == "X":
       getCol(game)
     else:
-      game.addPiece(net.evaluate(game.exportBoard())[0])
+      game.addPiece(net.findMove(game.exportBoard())[0])
     if game.win[0] == False:
       if game.humanPlayer == "O":
         getCol(game)
       else:
-        game.addPiece(net.evaluate(game.exportBoard())[0])
+        game.addPiece(net.findMove(game.exportBoard())[0])
   if game.win[1] == game.humanPlayer:
     print("Congrats!")
     print("Updating Network...")
@@ -178,5 +179,9 @@ def runGame():
   print("Starting new game...")
   
 def main():
-  runPlayerGame()
+  training_data, validation_data, test_data = \
+  dataLoader.loadData(30000,1000,1000)
+  net = network.Network(netLayers)
+  net.SGD(training_data,100,1000,0.2,test_data=test_data)
+  if input("Write to file? ") == "Yes": net.writeToFile()
 main()
